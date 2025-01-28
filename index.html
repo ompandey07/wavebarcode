@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAVE BARCODE</title>
+    <link rel="shortcut icon" href="eagle.png" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.0/JsBarcode.all.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #ffffff;
+        }
+
+        .navbar {
+            background: #2d2d2d;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .content-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #333333;
+            color: #ffffff;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .size-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .size-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            background: #333333;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .size-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .barcode-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-download {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            background: #059669;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-download:hover {
+            background: #047857;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-link {
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-link:hover {
+            color: #2563eb;
+        }
+
+        .whatsapp-link {
+            color: #25d366;
+        }
+
+        .whatsapp-link:hover {
+            color: #128c7e;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="Logo.jpg" alt="Wave Logo" class="logo-img">
+            <h3>WAVE BARCODE GENERATOR</h3>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        <div class="main-container">
+            <div class="input-group">
+                <label class="input-label" for="barcodeInput">ENTER BARCODE NUMBER</label>
+                <input type="text" id="barcodeInput" class="input-field" placeholder="Type your barcode number">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label" style="font-size: 10px;" >BARCODE SIZE</label>
+                <div class="size-selector">
+                    <button class="size-btn" data-size="small">
+                        <i class="ri-flask-line"></i>
+                        SMALL
+                    </button>
+                    <button class="size-btn active" data-size="medium">
+                        <i class="ri-flask-fill"></i>
+                        MEDIUM
+                    </button>
+                    <button class="size-btn" data-size="large">
+                        <i class="ri-test-tube-line"></i>
+                        LARGE
+                    </button>
+                </div>
+            </div>
+
+            <div class="barcode-container">
+                <svg id="barcode"></svg>
+            </div>
+
+            <button id="downloadBtn" class="btn-download">
+                <i class="ri-download-line"></i>
+                DOWNLOAD BARCODE
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <a href="https://wa.me/+9779800668758" class="footer-link whatsapp-link" target="_blank">
+            <i class="ri-whatsapp-line"></i>
+            +977 9800668758
+        </a>
+        <a href="https://finixdev.netlify.app/" class="footer-link" target="_blank">
+            <i class="ri-contacts-line"></i>
+            Contact Us
+        </a>
+    </footer>
+
+    <script>
+        const barcodeInput = document.getElementById('barcodeInput');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const sizeBtns = document.querySelectorAll('.size-btn');
+        let currentSize = 'medium';
+
+        const sizeConfigs = {
+            small: { width: 1.5, height: 30 },
+            medium: { width: 2, height: 40 },
+            large: { width: 2.5, height: 50 }
+        };
+
+        function generateBarcode() {
+            const config = sizeConfigs[currentSize];
+            if (barcodeInput.value) {
+                JsBarcode("#barcode", barcodeInput.value, {
+                    format: "CODE128",
+                    width: config.width,
+                    height: config.height,
+                    displayValue: true,
+                    background: "#ffffff",
+                    lineColor: "#000000",
+                    margin: 10,
+                    fontSize: 16,
+                    font: "Arial"
+                });
+            }
+        }
+
+        sizeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSize = btn.dataset.size;
+                generateBarcode();
+            });
+        });
+
+        barcodeInput.addEventListener('input', generateBarcode);
+
+        downloadBtn.addEventListener('click', () => {
+            const svg = document.getElementById('barcode');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const data = new XMLSerializer().serializeToString(svg);
+            const DOMURL = window.URL || window.webkitURL || window;
+            const img = new Image();
+            const svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+            const url = DOMURL.createObjectURL(svgBlob);
+
+            img.onload = function() {
+                canvas.width = svg.width.baseVal.value;
+                canvas.height = svg.height.baseVal.value;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                DOMURL.revokeObjectURL(url);
+
+                const link = document.createElement('a');
+                link.download = 'barcode.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            img.src = url;
+        });
+    </script>
+</body>
+</html>
