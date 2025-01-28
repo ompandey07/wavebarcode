@@ -199,7 +199,7 @@
         <!-- Left Section - Original Barcode Generator -->
         <div class="main-container">
             <div class="input-group">
-                <label class="input-label" for="barcodeInput">ENTER BARCODE NUMBER</label>
+                <label class="input-label" for="barcodeInput">ENTER BARCODE NUMBER <span style="padding-left: 200px;" >MANUAL GENERATOR</span></label>
                 <input type="text" id="barcodeInput" class="input-field" placeholder="Type your barcode number">
             </div>
 
@@ -240,7 +240,7 @@
         <!-- Right Section - Prefix Barcode Generator -->
         <div class="main-container">
             <div class="input-group">
-                <label class="input-label" for="prefixInput">ENTER PREFIX (2-4 CHARACTERS)</label>
+                <label class="input-label" for="prefixInput">ENTER PREFIX (2-4 CHARACTERS) <span style="padding-left: 120px;" > WAVE CUSTOM GENERATOR</span></label>
                 <input type="text" id="prefixInput" class="input-field" placeholder="Enter prefix (e.g., ABC)">
                 <div id="prefixError" class="error-message"></div>
             </div>
@@ -297,148 +297,170 @@
     </footer>
 
     <script>
-        // Common configuration
-        const sizeConfigs = {
-            small: { width: 1.5, height: 30 },
-            medium: { width: 2, height: 40 },
-            large: { width: 2.5, height: 50 }
-        };
+                                    // Common configuration
+const sizeConfigs = {
+    small: { width: 1.5, height: 30 },
+    medium: { width: 2, height: 40 },
+    large: { width: 2.5, height: 50 }
+};
 
-        // Left section - Original barcode generator
-        const barcodeInput = document.getElementById('barcodeInput');
-        const priceInput1 = document.getElementById('priceInput1');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const priceDisplay1 = document.getElementById('priceDisplay1');
-        let currentSize = 'medium';
+// Left section - Original barcode generator
+const barcodeInput = document.getElementById('barcodeInput');
+const priceInput1 = document.getElementById('priceInput1');
+const downloadBtn = document.getElementById('downloadBtn');
+const priceDisplay1 = document.getElementById('priceDisplay1');
+let currentSize = 'medium';
 
-        function generateBarcode() {
-            if (barcodeInput.value) {
-                const config = sizeConfigs[currentSize];
-                JsBarcode("#barcode", barcodeInput.value, {
-                    format: "CODE128",
-                    width: config.width,
-                    height: config.height,
-                    displayValue: true,
-                    background: "#ffffff",
-                    lineColor: "#000000",
-                    margin: 10,
-                    fontSize: 16,
-                    font: "Arial"
-                });
-                updatePriceDisplay(priceInput1.value, priceDisplay1);
-            }
-        }
-
-        // Right section - Prefix barcode generator
-        const prefixInput = document.getElementById('prefixInput');
-        const priceInput2 = document.getElementById('priceInput2');
-        const generateBtn = document.getElementById('generateBtn');
-        const downloadPrefixBtn = document.getElementById('downloadPrefixBtn');
-        const prefixError = document.getElementById('prefixError');
-        const priceDisplay2 = document.getElementById('priceDisplay2');
-
-        function generateRandomNumber() {
-            return Math.floor(100000 + Math.random() * 900000);
-        }
-
-        function validatePrefix(prefix) {
-            if (!prefix) {
-                prefixError.textContent = "Prefix is required";
-                return false;
-            }
-            if (!/^[A-Za-z]{2,4}$/.test(prefix)) {
-                prefixError.textContent = "Prefix must be 2-4 letters only";
-                return false;
-            }
-            prefixError.textContent = "";
-            return true;
-        }
-
-        function generatePrefixBarcode() {
-            const prefix = prefixInput.value.toUpperCase();
-            if (!validatePrefix(prefix)) return;
-
-            const randomNum = generateRandomNumber();
-            const barcodeValue = `${prefix}${randomNum}`;
-            const config = sizeConfigs[currentSize];
-
-            JsBarcode("#prefixBarcode", barcodeValue, {
-                format: "CODE128",
-                width: config.width,
-                height: config.height,
-                displayValue: true,
-                background: "#ffffff",
-                lineColor: "#000000",
-                margin: 10,
-                fontSize: 16,
-                font: "Arial"
-            });
-            updatePriceDisplay(priceInput2.value, priceDisplay2);
-        }
-
-        function updatePriceDisplay(price, displayElement) {
-            if (price) {
-                displayElement.textContent = `Price: NRS : ${parseFloat(price).toFixed(2)}`;
-            } else {
-                displayElement.textContent = '';
-            }
-        }
-
-        function downloadBarcode(svgId, prefix = '') {
-            const svg = document.getElementById(svgId);
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const data = new XMLSerializer().serializeToString(svg);
-            const DOMURL = window.URL || window.webkitURL || window;
-            const img = new Image();
-            const svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-            const url = DOMURL.createObjectURL(svgBlob);
-
-            img.onload = function() {
-                canvas.width = svg.width.baseVal.value;
-                canvas.height = svg.height.baseVal.value;
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-                DOMURL.revokeObjectURL(url);
-
-                const link = document.createElement('a');
-                link.download = `barcode${prefix}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            };
-            img.src = url;
-        }
-
-        // Event listeners
-        barcodeInput.addEventListener('input', generateBarcode);
-        priceInput1.addEventListener('input', generateBarcode);
-        generateBtn.addEventListener('click', generatePrefixBarcode);
-        downloadBtn.addEventListener('click', () => downloadBarcode('barcode'));
-        downloadPrefixBtn.addEventListener('click', () => downloadBarcode('prefixBarcode', '_prefix'));
-
-        // Size button functionality for both sections
-        document.querySelectorAll('.size-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const container = btn.closest('.main-container');
-                container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentSize = btn.dataset.size;
-                if (container.contains(document.getElementById('barcode'))) {
-                    generateBarcode();
-                } else {
-                    if (prefixInput.value) generatePrefixBarcode();}
-            });
+function generateBarcode() {
+    if (barcodeInput.value) {
+        const config = sizeConfigs[currentSize];
+        JsBarcode("#barcode", barcodeInput.value, {
+            format: "CODE128",
+            width: config.width,
+            height: config.height,
+            displayValue: true,
+            background: "#ffffff",
+            lineColor: "#000000",
+            margin: 10,
+            fontSize: 16,
+            font: "Arial"
         });
+        updatePriceDisplay(priceInput1.value, priceDisplay1);
+    }
+}
 
-        // Initial barcode generation
-        generateBarcode();
+// Right section - Prefix barcode generator
+const prefixInput = document.getElementById('prefixInput');
+const priceInput2 = document.getElementById('priceInput2');
+const generateBtn = document.getElementById('generateBtn');
+const downloadPrefixBtn = document.getElementById('downloadPrefixBtn');
+const prefixError = document.getElementById('prefixError');
+const priceDisplay2 = document.getElementById('priceDisplay2');
 
-        // Prefix input validation
-        prefixInput.addEventListener('input', function() {
-            this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0, 4);
-            validatePrefix(this.value);
-        });
+function generateRandomNumber() {
+    return Math.floor(100000 + Math.random() * 900000);
+}
+
+function validatePrefix(prefix) {
+    if (!prefix) {
+        prefixError.textContent = "Prefix is required";
+        return false;
+    }
+    if (!/^[A-Za-z]{2,4}$/.test(prefix)) {
+        prefixError.textContent = "Prefix must be 2-4 letters only";
+        return false;
+    }
+    prefixError.textContent = "";
+    return true;
+}
+
+function generatePrefixBarcode() {
+    const prefix = prefixInput.value.toUpperCase();
+    if (!validatePrefix(prefix)) return;
+
+    const randomNum = generateRandomNumber();
+    const barcodeValue = `${prefix}${randomNum}`;
+    const config = sizeConfigs[currentSize];
+
+    JsBarcode("#prefixBarcode", barcodeValue, {
+        format: "CODE128",
+        width: config.width,
+        height: config.height,
+        displayValue: true,
+        background: "#ffffff",
+        lineColor: "#000000",
+        margin: 10,
+        fontSize: 16,
+        font: "Arial"
+    });
+    updatePriceDisplay(priceInput2.value, priceDisplay2);
+}
+
+function updatePriceDisplay(price, displayElement) {
+    if (price) {
+        displayElement.textContent = `Price: NRS : ${parseFloat(price).toFixed(2)}`;
+    } else {
+        displayElement.textContent = '';
+    }
+}
+
+function downloadBarcode(svgId, prefix = '') {
+    const svg = document.getElementById(svgId);
+    const priceDisplay = svgId === 'barcode' ? priceDisplay1 : priceDisplay2;
+    const price = svgId === 'barcode' ? priceInput1.value : priceInput2.value;
+
+    // Get the dimensions of the SVG
+    const svgRect = svg.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas dimensions with extra space for price
+    canvas.width = svgRect.width;
+    canvas.height = svgRect.height + (price ? 40 : 0);
+
+    // Create a temporary image to draw the SVG
+    const img = new Image();
+    img.onload = function() {
+        // Fill white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the barcode image
+        ctx.drawImage(img, 0, 0);
+
+        // Add price text if exists
+        if (price) {
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Price: NRS : ${parseFloat(price).toFixed(2)}`, canvas.width / 2, canvas.height - 15);
+        }
+
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `barcode${prefix}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Convert SVG to data URL
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    img.src = URL.createObjectURL(svgBlob);
+}
+
+// Event listeners
+barcodeInput.addEventListener('input', generateBarcode);
+priceInput1.addEventListener('input', generateBarcode);
+generateBtn.addEventListener('click', generatePrefixBarcode);
+downloadBtn.addEventListener('click', () => downloadBarcode('barcode'));
+downloadPrefixBtn.addEventListener('click', () => downloadBarcode('prefixBarcode', '_prefix'));
+
+// Size button functionality for both sections
+document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const container = btn.closest('.main-container');
+        container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSize = btn.dataset.size;
+        if (container.contains(document.getElementById('barcode'))) {
+            generateBarcode();
+        } else {
+            if (prefixInput.value) generatePrefixBarcode();
+        }
+    });
+});
+
+// Initial barcode generation
+generateBarcode();
+
+// Prefix input validation
+prefixInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0, 4);
+    validatePrefix(this.value);
+});
     </script>
 </body>
 </html>
