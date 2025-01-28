@@ -48,9 +48,10 @@
         .content-container {
             flex: 1;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: space-between;
+            align-items: start;
             padding: 2rem;
+            gap: 2rem;
         }
 
         .main-container {
@@ -123,7 +124,14 @@
             margin-bottom: 1.5rem;
         }
 
-        .btn-download {
+        .price-display {
+            color: #000;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .btn-generate, .btn-download {
             width: 100%;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -137,9 +145,10 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .btn-download:hover {
+        .btn-generate:hover, .btn-download:hover {
             background: #047857;
         }
 
@@ -170,6 +179,12 @@
         .whatsapp-link:hover {
             color: #128c7e;
         }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -181,6 +196,7 @@
     </nav>
 
     <div class="content-container">
+        <!-- Left Section - Original Barcode Generator -->
         <div class="main-container">
             <div class="input-group">
                 <label class="input-label" for="barcodeInput">ENTER BARCODE NUMBER</label>
@@ -188,7 +204,12 @@
             </div>
 
             <div class="input-group">
-                <label class="input-label" style="font-size: 10px;" >BARCODE SIZE</label>
+                <label class="input-label" for="priceInput1">ENTER SALE PRICE</label>
+                <input type="number" id="priceInput1" class="input-field" placeholder="Enter sale price">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label" style="font-size: 10px;">BARCODE SIZE</label>
                 <div class="size-selector">
                     <button class="size-btn" data-size="small">
                         <i class="ri-flask-line"></i>
@@ -207,9 +228,57 @@
 
             <div class="barcode-container">
                 <svg id="barcode"></svg>
+                <div id="priceDisplay1" class="price-display"></div>
             </div>
 
             <button id="downloadBtn" class="btn-download">
+                <i class="ri-download-line"></i>
+                DOWNLOAD BARCODE
+            </button>
+        </div>
+
+        <!-- Right Section - Prefix Barcode Generator -->
+        <div class="main-container">
+            <div class="input-group">
+                <label class="input-label" for="prefixInput">ENTER PREFIX (2-4 CHARACTERS)</label>
+                <input type="text" id="prefixInput" class="input-field" placeholder="Enter prefix (e.g., ABC)">
+                <div id="prefixError" class="error-message"></div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label" for="priceInput2">ENTER SALE PRICE</label>
+                <input type="number" id="priceInput2" class="input-field" placeholder="Enter sale price">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label" style="font-size: 10px;">BARCODE SIZE</label>
+                <div class="size-selector">
+                    <button class="size-btn" data-size="small">
+                        <i class="ri-flask-line"></i>
+                        SMALL
+                    </button>
+                    <button class="size-btn active" data-size="medium">
+                        <i class="ri-flask-fill"></i>
+                        MEDIUM
+                    </button>
+                    <button class="size-btn" data-size="large">
+                        <i class="ri-test-tube-line"></i>
+                        LARGE
+                    </button>
+                </div>
+            </div>
+
+            <button id="generateBtn" class="btn-generate">
+                <i class="ri-barcode-line"></i>
+                GENERATE BARCODE
+            </button>
+
+            <div class="barcode-container">
+                <svg id="prefixBarcode"></svg>
+                <div id="priceDisplay2" class="price-display"></div>
+            </div>
+
+            <button id="downloadPrefixBtn" class="btn-download">
                 <i class="ri-download-line"></i>
                 DOWNLOAD BARCODE
             </button>
@@ -221,27 +290,30 @@
             <i class="ri-whatsapp-line"></i>
             +977 9800668758
         </a>
-        <a href="https://finixdev.netlify.app/" class="footer-link" target="_blank">
+        <a href="https://www.pioneersoftware.com.np/" class="footer-link" target="_blank">
             <i class="ri-contacts-line"></i>
             Contact Us
         </a>
     </footer>
 
     <script>
-        const barcodeInput = document.getElementById('barcodeInput');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const sizeBtns = document.querySelectorAll('.size-btn');
-        let currentSize = 'medium';
-
+        // Common configuration
         const sizeConfigs = {
             small: { width: 1.5, height: 30 },
             medium: { width: 2, height: 40 },
             large: { width: 2.5, height: 50 }
         };
 
+        // Left section - Original barcode generator
+        const barcodeInput = document.getElementById('barcodeInput');
+        const priceInput1 = document.getElementById('priceInput1');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const priceDisplay1 = document.getElementById('priceDisplay1');
+        let currentSize = 'medium';
+
         function generateBarcode() {
-            const config = sizeConfigs[currentSize];
             if (barcodeInput.value) {
+                const config = sizeConfigs[currentSize];
                 JsBarcode("#barcode", barcodeInput.value, {
                     format: "CODE128",
                     width: config.width,
@@ -253,22 +325,67 @@
                     fontSize: 16,
                     font: "Arial"
                 });
+                updatePriceDisplay(priceInput1.value, priceDisplay1);
             }
         }
 
-        sizeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                sizeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentSize = btn.dataset.size;
-                generateBarcode();
+        // Right section - Prefix barcode generator
+        const prefixInput = document.getElementById('prefixInput');
+        const priceInput2 = document.getElementById('priceInput2');
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadPrefixBtn = document.getElementById('downloadPrefixBtn');
+        const prefixError = document.getElementById('prefixError');
+        const priceDisplay2 = document.getElementById('priceDisplay2');
+
+        function generateRandomNumber() {
+            return Math.floor(100000 + Math.random() * 900000);
+        }
+
+        function validatePrefix(prefix) {
+            if (!prefix) {
+                prefixError.textContent = "Prefix is required";
+                return false;
+            }
+            if (!/^[A-Za-z]{2,4}$/.test(prefix)) {
+                prefixError.textContent = "Prefix must be 2-4 letters only";
+                return false;
+            }
+            prefixError.textContent = "";
+            return true;
+        }
+
+        function generatePrefixBarcode() {
+            const prefix = prefixInput.value.toUpperCase();
+            if (!validatePrefix(prefix)) return;
+
+            const randomNum = generateRandomNumber();
+            const barcodeValue = `${prefix}${randomNum}`;
+            const config = sizeConfigs[currentSize];
+
+            JsBarcode("#prefixBarcode", barcodeValue, {
+                format: "CODE128",
+                width: config.width,
+                height: config.height,
+                displayValue: true,
+                background: "#ffffff",
+                lineColor: "#000000",
+                margin: 10,
+                fontSize: 16,
+                font: "Arial"
             });
-        });
+            updatePriceDisplay(priceInput2.value, priceDisplay2);
+        }
 
-        barcodeInput.addEventListener('input', generateBarcode);
+        function updatePriceDisplay(price, displayElement) {
+            if (price) {
+                displayElement.textContent = `Price: NRS : ${parseFloat(price).toFixed(2)}`;
+            } else {
+                displayElement.textContent = '';
+            }
+        }
 
-        downloadBtn.addEventListener('click', () => {
-            const svg = document.getElementById('barcode');
+        function downloadBarcode(svgId, prefix = '') {
+            const svg = document.getElementById(svgId);
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const data = new XMLSerializer().serializeToString(svg);
@@ -286,11 +403,41 @@
                 DOMURL.revokeObjectURL(url);
 
                 const link = document.createElement('a');
-                link.download = 'barcode.png';
+                link.download = `barcode${prefix}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             };
             img.src = url;
+        }
+
+        // Event listeners
+        barcodeInput.addEventListener('input', generateBarcode);
+        priceInput1.addEventListener('input', generateBarcode);
+        generateBtn.addEventListener('click', generatePrefixBarcode);
+        downloadBtn.addEventListener('click', () => downloadBarcode('barcode'));
+        downloadPrefixBtn.addEventListener('click', () => downloadBarcode('prefixBarcode', '_prefix'));
+
+        // Size button functionality for both sections
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const container = btn.closest('.main-container');
+                container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSize = btn.dataset.size;
+                if (container.contains(document.getElementById('barcode'))) {
+                    generateBarcode();
+                } else {
+                    if (prefixInput.value) generatePrefixBarcode();}
+            });
+        });
+
+        // Initial barcode generation
+        generateBarcode();
+
+        // Prefix input validation
+        prefixInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^A-Za-z]/g, '').slice(0, 4);
+            validatePrefix(this.value);
         });
     </script>
 </body>
